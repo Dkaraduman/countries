@@ -31,9 +31,7 @@ export default {
         .get("https://restcountries.com/v2/all")
         .then(({ data }) => {
           
-          this.countriesData = data.map(({ name, capital, region, flag }) => {
-            return { name, capital, region, flag };
-          });
+          this.countriesData = data;
         })
         .catch((err) => {
           alert(err || "Internal Server Error");

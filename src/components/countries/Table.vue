@@ -10,9 +10,9 @@
           <th scope="col">Flag</th>
         </tr>
       </thead>
-      <tbody v-if="countriesFilteredData.length">
+      <tbody v-if="countriesData.length">
         <tr
-          v-for="(country, index) in countriesFilteredData"
+          v-for="(country, index) in countriesData"
           :key="country.name + country.capital"
           class=""
         >
@@ -38,7 +38,20 @@
 
 <script>
 export default {
-props:['countriesFilteredData']
+props:['countriesFilteredData'],
+data(){
+return {
+  countriesData:[]
+}
+},
+
+created(){
+
+     this.countriesData = this.countriesFilteredData.map(({ name, capital, region, flag }) => {
+            return { name, capital, region, flag };
+          });
+}
+
 }
 </script>
 

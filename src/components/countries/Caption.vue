@@ -14,7 +14,7 @@
         <div class="mr-2">
           <input
             class="form-control"
-            style="text-transform: lowercase;"
+           
             placeholder="Search All Type"
             v-model="allFilterReferance"
           />
@@ -24,7 +24,7 @@
           <input
             class="form-control"
             placeholder="Search capital"
-            style="text-transform: lowercase;"
+            
             v-model="capitalFilterReferance"
           />
       
@@ -42,6 +42,28 @@ export default {
       allFilterReferance:''
       }
     },
+
+    methods:{
+
+   convert (str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+},
+      
+      recursiveFilter(countryInfo,filterWord){
+          const countryInfosValues = Object.values(countryInfo);
+           
+        return   countryInfosValues.find(valueOfCountry => {
+                     
+                  if(typeof valueOfCountry == 'string'  ) return valueOfCountry?.toLowerCase().includes(filterWord?.toString().toLowerCase());
+                  if(typeof valueOfCountry == 'number') return  valueOfCountry?.toString().toLowerCase().includes(filterWord?.toString().toLowerCase())
+                  if(typeof valueOfCountry == 'object'){
+                    return this.recursiveFilter(valueOfCountry,filterWord)
+                  }
+                  return false;   
+              
+          })
+      },
+    },
     created(){
       // at created we set out the default to table. 
       this.$emit('filteredData',this.countriesData)
@@ -49,20 +71,21 @@ export default {
     },
     watch:{
     // find the country infos according to capital. 
-    capitalFilterReferance(filterWord){
-        
+    capitalFilterReferance(filterData){
+      let filterWord = this.convert(filterData)
      const countriesFilteredData = filterWord ?  this.countriesData.filter(({capital}) => {
-       if(typeof capital != 'undefined' && capital) return  capital.toLowerCase().includes(filterWord) && capital ;
+       if(typeof capital != 'undefined' && capital) return  capital.toLowerCase().includes(filterWord.toLowerCase()) && capital ;
       }) : this.countriesData ;
       // we are sending the filtred data by capital to parent component via emit func.
       this.$emit('filteredData',countriesFilteredData)
     },
 
+
     // find the country infos according to all types.
-    allFilterReferance(filterWord){
-         const countriesFilteredData = filterWord ? this.countriesData.filter(({name,region,capital,flag}) => {
-        return  capital?.toLowerCase().includes(filterWord) || name?.toLowerCase().includes(filterWord) || region?.toLowerCase().includes(filterWord)
-        && {name,region,capital,flag} ;
+    allFilterReferance(filterData){
+           let filterWord = this.convert(filterData)
+         const countriesFilteredData = filterWord ? this.countriesData.filter((countryInfo) => {
+            return this.recursiveFilter(countryInfo,filterWord)
       }) : this.countriesData
        // we are sending the filtred data by all type to parent component via emit func.
       this.$emit('filteredData',countriesFilteredData)
